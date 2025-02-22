@@ -11,35 +11,27 @@ go get github.com/rafael1mc/timetrack
 
 Initialize a timer:
 ```
-timer := timetrack.NewNode("My New Node")
+package main
+func main(){
+    timer := timetrack.NewNode("My New Node")
 
-// run some code, like:
-time.Sleep(200 * time.Millisecond)
+    // run some code, like:
+    time.Sleep(200 * time.Millisecond)
 
-dur := timer.Stop()
-fmt.Println("Took", dur, "to run")
+    dur := timer.Stop()
+    fmt.Println("Took", dur, "to run")
 
-// Took 201.063875ms to run
+    // Took 201.063875ms to run
+}
 ```
 
 # Examples
-I've created two examples, a simple one with children nodes and one to simulate tracking endpoint execution times. They are in the `examples` directory, and you can run them by cloning the repo and executing:
-```
-go run ./examples/simple
-```
-The terminal will show the results:
-```
-root node: 378.344666ms (100%)
-  |-- child node: 77.28075ms (20.4%)
-    |-- grandchild1 node: 51.100084ms (13.5%)
-    |-- grandchild2 node: 26.049791ms (6.9%)
-```
-OR
-```
-go run ./examples/api
-```
-And then open your browser at [localhost:4000](http://localhost:4000).  
-The terminal will show the results:
+I've created 3 examples.
+ - simple: `go run ./examples/simple`
+ - endpoint: `go run ./examples/api` (access [localhost:4000](http://localhost:4000))
+ - custom report: `go run ./examples/custom_report`
+
+This is a sample output for the endpoint example:
 ```
 middleware: 755.155875ms (100%)
   |-- controller: 755.123ms (100.0%)
@@ -65,6 +57,11 @@ There are helper functions to enrich a context:
  - `BranchFrom(context, name)`: pass a context and a name of the new child. If it finds a timer in the context, it will use that, otherwise it will spawn a new root timer. The returned context already has this timer in it
  - `WithTimeNode(context, node)`: returns a new context with the given node
 
+## Reporter
+The default reporter will indent the children, printing their names, the duration and the % it represents in the total of the node being reported.
+
+To provide your own reporter, just implement `Report(node *TimeNode) string` and pass it to `timer.SetReporter`.  
+
 # FAQ
 1. **Why don't the examples show exact milliseconds?**  
 Well, tracking logic adds extra calls, which takes their own execution time, albeit very small.
@@ -74,6 +71,12 @@ Mainly for 2 reasons:
     2. The parent can be performing tasks  
 So technically, the parent's execution time is AT LEAST its children execution time, not their sum.  
 A better sum would be `(parent - children) + children`, recursively.
+
+# TODO
+ - [ ] Test concurrency safety (specially root variables)
+ - [ ] Add secondary percentage to compare just chidren
+ - [ ] Provide abstraction for generating [Server Timming](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Server-Timing)
+ - [ ] Maybe add thresholds to trigger warnings (eg: >300ms warn)
 
 # License
 Check [LICENSE](https://github.com/rafael1mc/timetrack/blob/main/LICENSE) file.
