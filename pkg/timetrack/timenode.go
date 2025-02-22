@@ -5,36 +5,38 @@ import (
 	"time"
 )
 
-type TimeNode struct {
+func NewNode(name string) *timeNode {
+	tp := timeProvider()
+	return &timeNode{
+		name:         name,
+		startAt:      tp.Now(),
+		timeProvider: tp,
+	}
+}
+
+type timeNode struct {
 	name      string
 	startAt   time.Time
 	duration  time.Duration
-	children  []*TimeNode
-	parent    *TimeNode
+	children  []*timeNode
+	parent    *timeNode
 	completed bool
 	mu        sync.Mutex
 
 	timeProvider TimeProvider
-	timeReport   TimeReport
+	// customReporter TimeReporter
 }
 
-func NewNode(name string) *TimeNode {
-	initTimeProvider()
-	return &TimeNode{
-		name:    name,
-		startAt: timeProvider.Now(),
-	}
-}
-
-func (n *TimeNode) Branch(name string) *TimeNode {
-	initTimeProvider()
+func (n *timeNode) Branch(name string) *timeNode {
 	n.mu.Lock()
 	defer n.mu.Unlock()
 
-	child := &TimeNode{
-		name:    name,
-		startAt: timeProvider.Now(),
-		parent:  n,
+	tp := timeProvider()
+	child := &timeNode{
+		name:         name,
+		startAt:      tp.Now(),
+		parent:       n,
+		timeProvider: tp,
 	}
 
 	n.children = append(n.children, child)
@@ -43,8 +45,7 @@ func (n *TimeNode) Branch(name string) *TimeNode {
 	return child
 }
 
-func (n *TimeNode) Stop() time.Duration {
-	initTimeProvider()
+func (n *timeNode) Stop() time.Duration {
 	n.mu.Lock()
 	defer n.mu.Unlock()
 
@@ -62,27 +63,28 @@ func (n *TimeNode) Stop() time.Duration {
 	return n.duration
 }
 
-func (n *TimeNode) CurrentDuration() time.Duration {
+func (n *timeNode) CurrentDuration() time.Duration {
 	if !n.completed {
-		return timeProvider.Now().Sub(n.startAt)
+		return n.timeProvider.Now().Sub(n.startAt)
 	}
 	return n.duration
 }
 
-func (n *TimeNode) String() string {
-	return n.Report().Report(n)
-}
+// func (n *timeNode) String() string {
+// 	// TODO init reporter
+// 	return n.Report(defaultReporter).Report(n)
+// }
 
-func (n *TimeNode) Report() TimeReport {
-	initTimeProvider()
+// func (n *timeNode) Report(r TimeReporter) {
+// 	initTimeProvider()
 
-	if n.timeReport == nil {
-		n.timeReport = SimpleTimeReport{
-			node:  n,
-			total: n.Stop(),
-		}
-	}
+// 	if n.timeReport == nil {
+// 		n.timeReport = SimpleTimeReport{
+// 			node:  n,
+// 			total: n.Stop(),
+// 		}
+// 	}
 
-	// TODO this name is weird. TimeReport is not the report, but a reporter(?)
-	return n.timeReport
-}
+// 	// TODO this name is weird. TimeReport is not the report, but a reporter(?)
+// 	return n.timeReport
+// }

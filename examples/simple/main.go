@@ -29,5 +29,6 @@ func exampleFunction() {
 
 	timer.Stop()
 
+	// fmt.Println(timer.Report(reporter))
 	fmt.Println(timer)
 }

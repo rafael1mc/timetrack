@@ -6,11 +6,11 @@ import (
 
 type timeNodeKey struct{}
 
-// GoFrom will retrieve a TimerNode from ctx and create a new child counter called name
+// BranchFrom will retrieve a timeNode from ctx and create a new child counter called name
 // If there's no node in context, it will create a new one and put it inside returned ctx
-func BranchFrom(ctx context.Context, name string) (context.Context, *TimeNode) {
-	var newNode *TimeNode
-	if node, ok := ctx.Value(timeNodeKey{}).(*TimeNode); ok {
+func BranchFrom(ctx context.Context, name string) (context.Context, *timeNode) {
+	var newNode *timeNode
+	if node, ok := ctx.Value(timeNodeKey{}).(*timeNode); ok {
 		newNode = node.Branch(name)
 	} else {
 		newNode = NewNode(name)
@@ -19,7 +19,7 @@ func BranchFrom(ctx context.Context, name string) (context.Context, *TimeNode) {
 	return newCtx, newNode
 }
 
-// WithTimerNode returns a new context with a TimeNode inside
-func WithTimeNode(ctx context.Context, node *TimeNode) context.Context {
+// WithtimeNode returns a new context with a timeNode inside
+func WithTimeNode(ctx context.Context, node *timeNode) context.Context {
 	return context.WithValue(ctx, timeNodeKey{}, node)
 }
