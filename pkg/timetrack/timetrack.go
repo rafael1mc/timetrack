@@ -7,8 +7,7 @@ import (
 )
 
 var defaultTimeProvider TimeProvider
-
-// var defaultReporter TimeReporter
+var defaultReporter TimeReporter
 var mu sync.Mutex
 
 // timeProvider is a workaround so we don't have to keep passing the provider on every call
@@ -32,20 +31,13 @@ func SetupTimeProvider(tp TimeProvider) {
 	defaultTimeProvider = tp
 }
 
-// func initTimeProvider() {
-// 	mu.Lock()
+func reporter() TimeReporter {
+	mu.Lock()
+	defer mu.Unlock()
 
-// 	if timeProvider == nil {
-// 		mu.Unlock()
-// 		SetupTimeProvider(timeprovider.NewRealTime())
-// 	} else {
-// 		mu.Unlock()
-// 	}
-// }
+	if defaultReporter == nil {
+		defaultReporter = NewSimpleTimeReporter()
+	}
 
-// func SetupTimeProvider(tp TimeProvider) {
-// 	mu.Lock()
-// 	defer mu.Unlock()
-
-// 	timeProvider = tp
-// }
+	return defaultReporter
+}

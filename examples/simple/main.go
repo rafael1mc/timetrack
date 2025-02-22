@@ -29,6 +29,8 @@ func exampleFunction() {
 
 	timer.Stop()
 
-	// fmt.Println(timer.Report(reporter))
 	fmt.Println(timer)
+	fmt.Println(childExecution)
+	// fmt.Println(grandChildExecution1)
+	// fmt.Println(grandChildExecution2)
 }
